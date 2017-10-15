@@ -44,7 +44,6 @@ static int hmc5883_setup(lua_State* L) {
     if ((devid_a != 0x48) || (devid_b != 0x34) || (devid_c != 0x33)) {
         return luaL_error(L, "device not found");
     }
-
     // 8 sample average, 15 Hz update rate, normal measurement
     w8u(hmc5883_i2c_id, 0x00, 0x70);
 
@@ -55,6 +54,23 @@ static int hmc5883_setup(lua_State* L) {
     w8u(hmc5883_i2c_id, 0x02, 0x00);
 
     return 0;
+}
+
+static int hmc5883_init(lua_State* L) {
+
+    uint32_t sda;
+    uint32_t scl;
+
+    platform_print_deprecation_note("hmc5883l.init() is replaced by hmc5883l.setup()", "in the next version");
+
+    sda = luaL_checkinteger(L, 1);
+    scl = luaL_checkinteger(L, 2);
+
+    luaL_argcheck(L, sda > 0 && scl > 0, 1, "no i2c for D0");
+
+    platform_i2c_setup(hmc5883_i2c_id, sda, scl, PLATFORM_I2C_SPEED_SLOW);
+
+    return hmc5883_setup(L);
 }
 
 static int hmc5883_read(lua_State* L) {
